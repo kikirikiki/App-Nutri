@@ -97,6 +97,8 @@ Comportamiento actual del boton:
 
 - una pulsacion inicia la escucha
 - el boton queda en estado activo hasta que el usuario vuelve a pulsarlo
+- una segunda pulsacion detiene la escucha de verdad
+- la app evita reactivaciones automaticas no deseadas del motor nativo
 - el estilo del boton cambia a un estado visual mucho mas evidente mientras escucha
 - el APK usa reconocimiento nativo mediante `@capacitor-community/speech-recognition`, no solo la API web
 
