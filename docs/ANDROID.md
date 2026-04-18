@@ -10,6 +10,8 @@ El proyecto ya incluye:
 - proyecto nativo en `android/`
 - soporte PWA
 - `APK debug` compilado
+- salida versionada del APK
+- reconocimiento de voz nativo en Android
 
 ## Requisitos
 
@@ -50,6 +52,24 @@ El APK debug queda en:
 android\app\build\outputs\apk\debug\app-debug.apk
 ```
 
+Despues de generar el debug APK, crea la copia versionada con:
+
+```powershell
+npm.cmd run apk:versioned
+```
+
+La salida versionada queda en:
+
+```text
+apk\ExactMeals-v0.1.0-debug.apk
+```
+
+Las versiones anteriores se mueven a:
+
+```text
+apk\archivo\
+```
+
 ## Instalar en una tablet Android
 
 Opciones sencillas:
@@ -66,12 +86,19 @@ Luego en la tablet:
 
 ## Microfono en Android
 
-En tablet Android el dictado tiene mucho mas sentido que en escritorio, especialmente si el ordenador no tiene microfono.
+En tablet Android el dictado tiene mucho mas sentido que en este PC, especialmente si el ordenador no tiene microfono.
 
 Al abrir la app instalada:
 
 1. concede permiso al microfono
 2. prueba el boton `Hablar`
+
+Comportamiento actual del boton:
+
+- una pulsacion inicia la escucha
+- el boton queda en estado activo hasta que el usuario vuelve a pulsarlo
+- el estilo del boton cambia a un estado visual mucho mas evidente mientras escucha
+- el APK usa reconocimiento nativo mediante `@capacitor-community/speech-recognition`, no solo la API web
 
 ## Notas importantes
 
@@ -79,3 +106,5 @@ Al abrir la app instalada:
 - Sirve para pruebas internas.
 - No es todavia una build `release` firmada.
 - Para Google Play haria falta generar una build firmada o un `AAB`.
+- La version del archivo se toma de `package.json`.
+- La version Android visible tambien se refleja en `android/app/build.gradle`.
