@@ -142,6 +142,7 @@ Notas importantes:
 - si el dispositivo no tiene microfono, el dictado no podra activarse
 - dentro del APK Android usa reconocimiento de voz nativo con Capacitor
 - en Android el boton del micro queda activo hasta que el usuario vuelve a pulsarlo
+- una segunda pulsacion apaga correctamente la escucha y evita reactivaciones automaticas no deseadas
 - cuando esta escuchando, el boton pasa a estado visual destacado para que sea evidente
 
 ## Desarrollo local
