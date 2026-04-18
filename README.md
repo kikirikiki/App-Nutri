@@ -11,6 +11,9 @@ El proyecto esta orientado a una nutricionista y sus pacientes. El objetivo del 
 - Convierte el PDF a un modelo estructurado interno.
 - Guarda planes en `localStorage` para trabajar en local sin backend.
 - Genera comidas exactas desde el plan real del paciente.
+- Incluye un modo `No pensar` derivado del plan real del paciente.
+- Incluye una propuesta `Semanal` derivada del plan real del paciente.
+- Permite guardar gustos del paciente para personalizar esas propuestas.
 - Soporta reglas distintas para:
   - comidas principales
   - comidas no principales
@@ -101,6 +104,8 @@ La app separa claramente ambos perfiles:
 2. Va a `/generar`.
 3. Escribe o dicta lo que tiene o lo que le apetece.
 4. La app devuelve ingredientes y cantidades del plan.
+5. Puede entrar en `/rapido` para elegir opciones cerradas sin pensar.
+6. Puede entrar en `/semana` para ver una propuesta semanal basada en su plan y en sus gustos.
 
 ## Parser del PDF
 
@@ -142,8 +147,23 @@ Notas importantes:
 - si el dispositivo no tiene microfono, el dictado no podra activarse
 - dentro del APK Android usa reconocimiento de voz nativo con Capacitor
 - en Android el boton del micro queda activo hasta que el usuario vuelve a pulsarlo
-- una segunda pulsacion apaga correctamente la escucha y evita reactivaciones automaticas no deseadas
+- una segunda pulsacion lo apaga correctamente dentro del APK
 - cuando esta escuchando, el boton pasa a estado visual destacado para que sea evidente
+
+## Personalizacion del paciente
+
+Las pantallas `Rapido` y `Semana` se apoyan en una encuesta rapida de gustos del paciente.
+
+Se guardan:
+
+- ingredientes favoritos
+- ingredientes que prefiere evitar
+- formatos preferidos
+
+Con eso:
+
+- `No pensar` ofrece tarjetas cerradas del plan real, priorizando lo que mas le gusta
+- `Semana` genera una propuesta semanal a partir del plan real, pero rotando segun esas preferencias
 
 ## Desarrollo local
 
@@ -226,7 +246,17 @@ Despues de compilarlo, se puede generar una copia versionada con:
 npm.cmd run apk:versioned
 ```
 
-La salida versionada queda en la carpeta `apk/` y las versiones anteriores se mueven a `apk/archivo`.
+La salida versionada queda en:
+
+```text
+apk/
+```
+
+Y las versiones antiguas se mueven a:
+
+```text
+apk/archivo
+```
 
 La guia completa de Android esta en `docs/ANDROID.md`.
 
@@ -240,6 +270,8 @@ Esto implica:
 - no hay persistencia entre dispositivos
 - los planes cargados pertenecen al navegador local actual
 
+El proyecto mantiene placeholders para integracion futura con Supabase.
+
 ## Estado actual
 
 Lo que esta especialmente bien cubierto en este punto:
@@ -248,6 +280,9 @@ Lo que esta especialmente bien cubierto en este punto:
 - vista previa estructurada en admin
 - separacion de roles
 - generacion basada en plan real
+- modo no pensar derivado del plan real
+- semana derivada del plan real
+- personalizacion por gustos del paciente
 - equivalencias derivadas entre contextos
 - voz en navegador compatible
 - voz nativa dentro del APK Android
