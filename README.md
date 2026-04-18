@@ -16,7 +16,7 @@ El proyecto esta orientado a una nutricionista y sus pacientes. El objetivo del 
   - comidas no principales
 - Usa equivalencias derivadas entre contextos cuando un alimento existe en comida o desayuno y falta en el otro.
 - Sugiere grasas compatibles cuando faltan para cerrar una comida.
-- Incluye dictado por voz en navegadores compatibles.
+- Incluye dictado por voz en navegador y soporte nativo dentro del APK Android.
 - Se puede instalar como `PWA`.
 - Tiene proyecto Android con `Capacitor` y un `APK debug` generado.
 
@@ -140,6 +140,9 @@ Notas importantes:
   - `https://...`
   - o `https://localhost:5173` en local
 - si el dispositivo no tiene microfono, el dictado no podra activarse
+- dentro del APK Android usa reconocimiento de voz nativo con Capacitor
+- en Android el boton del micro queda activo hasta que el usuario vuelve a pulsarlo
+- cuando esta escuchando, el boton pasa a estado visual destacado para que sea evidente
 
 ## Desarrollo local
 
@@ -207,6 +210,7 @@ Scripts utiles:
 npm.cmd run cap:sync
 npm.cmd run android:open
 npm.cmd run android:copy
+npm.cmd run apk:versioned
 ```
 
 Se ha generado un APK debug en el proyecto local en:
@@ -214,6 +218,14 @@ Se ha generado un APK debug en el proyecto local en:
 ```text
 android/app/build/outputs/apk/debug/app-debug.apk
 ```
+
+Despues de compilarlo, se puede generar una copia versionada con:
+
+```powershell
+npm.cmd run apk:versioned
+```
+
+La salida versionada queda en la carpeta `apk/` y las versiones anteriores se mueven a `apk/archivo`.
 
 La guia completa de Android esta en `docs/ANDROID.md`.
 
@@ -237,8 +249,11 @@ Lo que esta especialmente bien cubierto en este punto:
 - generacion basada en plan real
 - equivalencias derivadas entre contextos
 - voz en navegador compatible
+- voz nativa dentro del APK Android
+- boton de micro persistente y visualmente destacado en tablet
 - instalacion PWA
 - empaquetado Android con APK debug
+- versionado manual del APK con carpeta de archivo
 
 ## Proximos pasos recomendados
 
