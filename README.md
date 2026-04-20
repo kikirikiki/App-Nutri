@@ -14,6 +14,10 @@ El proyecto esta orientado a una nutricionista y sus pacientes. El objetivo del 
 - Incluye un modo `No pensar` derivado del plan real del paciente.
 - Incluye una propuesta `Semanal` derivada del plan real del paciente.
 - Permite guardar gustos del paciente para personalizar esas propuestas.
+- Compacta la `Semana` para reutilizar mas ingredientes y no disparar la cesta de la compra.
+- Genera una `lista de la compra` desde la semana y agrupa ingredientes repetidos.
+- Soporta `modo pareja` cuando dos pacientes tienen planes estructuralmente compatibles.
+- En modo pareja mantiene la misma comida exacta para ambos y separa cantidades por persona.
 - Soporta reglas distintas para:
   - comidas principales
   - comidas no principales
@@ -22,6 +26,16 @@ El proyecto esta orientado a una nutricionista y sus pacientes. El objetivo del 
 - Incluye dictado por voz en navegador y soporte nativo dentro del APK Android.
 - Se puede instalar como `PWA`.
 - Tiene proyecto Android con `Capacitor` y un `APK debug` generado.
+
+## Documentacion viva
+
+Este repositorio se esta documentando de forma incremental. La idea es que cada cambio funcional relevante quede reflejado en GitHub para que la documentacion no se desincronice de la app.
+
+Cuando se hagan cambios importantes, se actualizaran como minimo:
+
+- este `README.md`
+- la guia de Android si afecta al APK o al comportamiento movil
+- y las secciones de flujo o estado actual cuando cambie la experiencia real del producto
 
 ## Enfoque funcional
 
@@ -94,9 +108,14 @@ La app separa claramente ambos perfiles:
 
 1. Entra en `/auth` como nutricionista.
 2. Va a `/admin`.
-3. Sube un `PDF` o `JSON`.
-4. Revisa la vista previa estructurada del plan.
-5. Guarda o actualiza el paciente.
+3. Puede usar tres vistas:
+   - `Pacientes`
+   - `Parejas`
+   - `Clientes activos`
+4. Sube un `PDF` o `JSON`.
+5. Revisa la vista previa estructurada del plan.
+6. Guarda o actualiza el paciente.
+7. Si dos pacientes tienen planes compatibles, puede crear una pareja para que coman juntos.
 
 ### Paciente
 
@@ -106,6 +125,7 @@ La app separa claramente ambos perfiles:
 4. La app devuelve ingredientes y cantidades del plan.
 5. Puede entrar en `/rapido` para elegir opciones cerradas sin pensar.
 6. Puede entrar en `/semana` para ver una propuesta semanal basada en su plan y en sus gustos.
+7. Si su nutricionista le ha vinculado una pareja compatible, puede cambiar entre modo individual y modo pareja.
 
 ## Parser del PDF
 
@@ -119,6 +139,13 @@ El parser intenta representar fielmente el sistema nutricional del documento:
   - familias reales del PDF
   - familias por bloques
   - familias de opciones completas
+
+Archivos clave:
+
+- `src/lib/pdf-plan-parser.ts`
+- `src/lib/scope-lock.ts`
+- `src/lib/plan-storage.ts`
+- `src/types/domain.ts`
 
 ## Scope Lock
 
@@ -164,6 +191,38 @@ Con eso:
 
 - `No pensar` ofrece tarjetas cerradas del plan real, priorizando lo que mas le gusta
 - `Semana` genera una propuesta semanal a partir del plan real, pero rotando segun esas preferencias
+
+## Modo pareja
+
+La app ya soporta una primera version operativa del modo pareja.
+
+Condiciones:
+
+- ambos pacientes deben tener planes con la misma estructura
+- la pareja se crea desde `Admin`
+- el paciente puede alternar entre:
+  - `Comer por separado`
+  - `Comer con su pareja`
+
+Comportamiento actual:
+
+- `Generar`
+  - mantiene la misma comida exacta para ambos
+  - muestra cantidades del paciente actual
+  - muestra cantidades de la pareja
+  - muestra el total para cocinar
+- `Rapido`
+  - mantiene la misma opcion cerrada para ambos
+  - cambia solo las cantidades
+- `Semana`
+  - proyecta la misma semana sobre el segundo plan
+  - consolida la lista de la compra para ambos
+
+Archivos clave:
+
+- `src/lib/couple-mode.ts`
+- `src/components/CoupleModePanel.tsx`
+- `src/pages/AdminPage.tsx`
 
 ## Desarrollo local
 
@@ -215,6 +274,12 @@ Incluye:
 - iconos Android
 - registro automatico del SW
 
+Archivos clave:
+
+- `vite.config.ts`
+- `src/main.tsx`
+- `public/icons`
+
 Para instalarla como PWA en Android:
 
 1. publica la app bajo HTTPS
@@ -225,6 +290,11 @@ Para instalarla como PWA en Android:
 
 El proyecto incluye un wrapper nativo Android con Capacitor.
 
+Archivos clave:
+
+- `capacitor.config.ts`
+- `android`
+
 Scripts utiles:
 
 ```powershell
@@ -234,7 +304,7 @@ npm.cmd run android:copy
 npm.cmd run apk:versioned
 ```
 
-Se ha generado un APK debug en el proyecto local en:
+Se ha generado un APK debug en:
 
 ```text
 android/app/build/outputs/apk/debug/app-debug.apk
@@ -252,13 +322,15 @@ La salida versionada queda en:
 apk/
 ```
 
-Y las versiones antiguas se mueven a:
+Y las versiones antiguas se guardan en:
 
 ```text
 apk/archivo
 ```
 
-La guia completa de Android esta en `docs/ANDROID.md`.
+La guia completa de Android esta en:
+
+`docs/ANDROID.md`
 
 ## Almacenamiento actual
 
@@ -270,7 +342,10 @@ Esto implica:
 - no hay persistencia entre dispositivos
 - los planes cargados pertenecen al navegador local actual
 
-El proyecto mantiene placeholders para integracion futura con Supabase.
+El proyecto mantiene placeholders para integracion futura con Supabase en:
+
+- `src/integrations/supabase/client.ts`
+- `src/integrations/supabase/types.ts`
 
 ## Estado actual
 
@@ -282,7 +357,11 @@ Lo que esta especialmente bien cubierto en este punto:
 - generacion basada en plan real
 - modo no pensar derivado del plan real
 - semana derivada del plan real
+- semana compactada para reducir ingredientes distintos
+- lista de la compra derivada de la semana
 - personalizacion por gustos del paciente
+- modo pareja con la misma comida y cantidades separadas
+- admin con vista de pacientes, parejas y clientes activos
 - equivalencias derivadas entre contextos
 - voz en navegador compatible
 - voz nativa dentro del APK Android
