@@ -23,6 +23,7 @@ El proyecto esta orientado a una nutricionista y sus pacientes. El objetivo del 
   - comidas no principales
 - Usa equivalencias derivadas entre contextos cuando un alimento existe en comida o desayuno y falta en el otro.
 - Sugiere grasas compatibles cuando faltan para cerrar una comida.
+- Puede usar un fallback opcional con `Gemini` solo para interpretar frases ambiguas o platos compuestos, manteniendo las cantidades en el motor determinista.
 - Incluye dictado por voz en navegador y soporte nativo dentro del APK Android.
 - Se puede instalar como `PWA`.
 - Tiene proyecto Android con `Capacitor` y un `APK debug` generado.
@@ -159,6 +160,60 @@ El generador usa una logica de validacion para evitar respuestas incoherentes:
   - `claras de huevo` frente a `huevo entero`
 - sugiere grasas compatibles cuando faltan
 - puede derivar cantidades entre desayuno y comida cuando el alimento falta en uno de los contextos
+
+## Fallback con Gemini
+
+La app ya viene preparada para una capa opcional de interpretacion con `Gemini`.
+
+Importante:
+
+- `Gemini` no calcula gramos
+- `Gemini` no elige cantidades
+- `Gemini` no puede inventar ingredientes fuera del plan
+- solo se usa para traducir lenguaje natural ambiguo a una intencion estructurada
+
+Arquitectura:
+
+1. primero corre el motor local determinista
+2. si detecta baja confianza o un caso ambiguo, puede llamar a `Gemini`
+3. `Gemini` devuelve una intencion estructurada en JSON
+4. la app reconstruye un prompt canonico
+5. el motor determinista vuelve a resolver la comida y calcular cantidades
+
+Casos pensados para ese fallback:
+
+- platos compuestos como `tortilla de atun`
+- nombres muy cotidianos o poco tecnicos
+- frases con formato culinario ambiguo
+- casos donde el motor local no cierra bien la intencion
+
+Configuracion local:
+
+1. copia `.env.example` a `.env`
+2. rellena la clave:
+
+```text
+GEMINI_API_KEY=tu_clave
+GEMINI_MODEL=gemini-2.5-flash-lite
+```
+
+La app no llama a Gemini directamente desde cliente. El flujo es:
+
+- frontend -> `/api/gemini/health`
+- frontend -> `/api/gemini/generate`
+- backend local -> Gemini con `GEMINI_API_KEY`
+
+Archivos clave:
+
+- `src/lib/gemini-intent.ts`
+- `src/lib/gemini-intent.test.ts`
+
+Nota:
+
+- la clave solo vive en backend
+- el badge ya distingue `Gemini inactivo`, `Gemini configurado`, `Gemini operativo` y `Gemini con error`
+- la generacion semantica real pasa por backend
+- si Gemini falla, la app intenta seguir resolviendo con el motor local cuando puede
 
 ## Voz
 
@@ -301,14 +356,25 @@ Scripts utiles:
 npm.cmd run cap:sync
 npm.cmd run android:open
 npm.cmd run android:copy
+npm.cmd run android:assemble
 npm.cmd run apk:versioned
+```
+
+Para compilar Android de forma consistente en esta maquina, el flujo recomendado es:
+
+```powershell
+npm.cmd run android:assemble
+```
+
+Ese script usa el `Java 21` embebido en Android Studio:
+
+```text
+C:\Program Files\Android\Android Studio\jbr
 ```
 
 Se ha generado un APK debug en:
 
-```text
-android/app/build/outputs/apk/debug/app-debug.apk
-```
+`app-debug.apk`
 
 Despues de compilarlo, se puede generar una copia versionada con:
 
@@ -318,15 +384,11 @@ npm.cmd run apk:versioned
 
 La salida versionada queda en:
 
-```text
-apk/
-```
+`apk`
 
 Y las versiones antiguas se guardan en:
 
-```text
-apk/archivo
-```
+`apk/archivo`
 
 La guia completa de Android esta en:
 
@@ -366,9 +428,34 @@ Lo que esta especialmente bien cubierto en este punto:
 - voz en navegador compatible
 - voz nativa dentro del APK Android
 - boton de micro persistente y visualmente destacado en tablet
+- fallback semantico de Gemini por backend, sin exponer la API key en cliente
+- estado visible de Gemini: configurado, operativo o con error
 - instalacion PWA
 - empaquetado Android con APK debug
 - versionado manual del APK con carpeta de archivo
+- compilacion Android alineada con Java 21 desde Android Studio
+
+## Cambios recientes
+
+- Se ha reforzado la interpretacion de platos compuestos tipo:
+  - `tortilla de atun`
+  - `revuelto con pavo`
+  - `omelette con salmon`
+  - `wrap proteico`
+  - `burrito de pollo`
+- En esos casos la app ya prioriza una base de huevo o un formato `wrap/fajitas` sin duplicar carbohidratos ni meter opciones genericas raras del mismo bloque.
+- Se ha ampliado la suite de regresion con casos reales de `Juan` y `Maria`.
+- La bateria actual cubre parser, motor principal, regresion y fallback semantico con un total de `33 tests` verdes.
+- Se ha preparado una capa opcional de `Gemini` como fallback semantico para frases ambiguas o platos compuestos:
+  - solo interpreta la intencion
+  - no calcula gramos
+  - no inventa ingredientes
+  - siempre devuelve el control al motor determinista
+- Se ha movido la integracion de Gemini a backend local para desarrollo:
+  - la key vive solo en servidor
+  - el frontend consulta `/api/gemini/health`
+  - la generacion semantica pasa por `/api/gemini/generate`
+- Se ha creado un flujo de compilacion Android estable con `npm.cmd run android:assemble` usando el Java 21 embebido en Android Studio.
 
 ## Proximos pasos recomendados
 
