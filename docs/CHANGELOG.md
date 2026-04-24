@@ -2,6 +2,29 @@
 
 Registro de cambios funcionales relevantes del MVP.
 
+## 2026-04-24
+
+### Hallazgos
+
+- Los planes guardados en local podian seguir usando una lectura antigua del PDF aunque el parser ya se hubiera corregido.
+- Eso explicaba parte de las diferencias entre lo que hacia la web/app y lo que ya estaba arreglado en el codigo actual.
+- El parser principal sigue teniendo heuristicas y fallbacks: si una lectura vieja se conserva, el motor puede trabajar sobre datos ya desfasados.
+- La cobertura de tests era buena a nivel de motor, pero no habia una barrera explicita para bloquear planes parseados con una version antigua.
+
+### Soluciones
+
+- Se ha introducido versionado del parser dentro de `planData.source`.
+- Los planes parseados desde PDF con una version antigua del parser quedan marcados como `requiresReupload`.
+- El motor de generacion bloquea esos planes y pide volver a subir el PDF, en lugar de seguir generando con datos potencialmente inconsistentes.
+- La interfaz de nutricionista muestra ahora mejor el origen del plan, la version del parser y si requiere recarga.
+- Se ha añadido una regresion automatica para asegurar que un plan antiguo no vuelva a colarse como si fuera valido.
+
+### Objetivo del blindaje
+
+- Priorizar seguridad funcional sobre falsa sensacion de que el plan esta bien cargado.
+- Evitar fallos silenciosos con Maria, Juan o futuros pacientes cuando cambie el parser.
+- Forzar reparseo cuando haga falta, en vez de reutilizar lecturas viejas dudosas.
+
 ## 2026-04-23
 
 ### Motor de comidas principales
