@@ -2,6 +2,87 @@
 
 Registro de cambios funcionales relevantes del MVP.
 
+## 2026-04-26
+
+### Motor de generacion y fidelidad al plan
+
+- Se corrigio un fallo grave por el que `humus` podia acabar convertido en una comida no principal con `Legumbres cocidas`, `Huevo entero` y cantidades imposibles.
+- La app ahora distingue entre una relacion semantica y una equivalencia operativa:
+  - `humus/hummus` puede relacionarse semanticamente con garbanzos o legumbres.
+  - No se convierte automaticamente en gramos de garbanzos o legumbres cocidas.
+  - Si `hummus` no aparece literalmente en el plan con gramos propios, el motor bloquea y pide confirmacion del nutricionista.
+- Se anadio una ruta de consulta directa de cantidades:
+  - si el usuario pregunta "cuanto puedo comer de X" y X esta en el plan, se devuelve la cantidad.
+  - si X no esta en el plan, se bloquea sin intentar construir una comida.
+- Se reforzo el guardarrail de Gemini:
+  - Gemini puede ayudar a interpretar intencion.
+  - Gemini no puede introducir alimentos no anclados en el texto original del usuario.
+  - conversiones como `humus -> huevos` o `humus -> legumbres con gramos` quedan bloqueadas.
+- Se limito el uso de equivalencias derivadas en comidas no principales para evitar cantidades absurdas al cruzar familias o bloques.
+- Se cambio el mensaje cuando una equivalencia principal esta marcada como fallback:
+  - antes parecia que faltaba concretar un alimento.
+  - ahora indica que el plan local necesita volver a cargarse o importar el JSON correcto.
+
+### Modo pareja
+
+- Se corrigio el reparto de cantidades explicitas como stock compartido.
+- Ejemplo validado:
+  - si hay `25g de pasta` para dos personas, no se asignan 25g a cada una.
+  - se reparte proporcionalmente entre los planes de ambos pacientes.
+- Se mantiene la grasa normal cuando el usuario no la ha limitado de forma explicita.
+
+### Alias culinarios
+
+- Se reforzaron alias seguros como:
+  - `macarrones` -> `Pasta`
+  - `cuscus` -> `Couscous`
+  - `burrito/wrap` -> `Fajitas / Wraps`
+  - `pechuga/pechugas` -> `Carne blanca`
+- Los alias solo se usan si la equivalencia base esta confirmada en el plan.
+- Si la equivalencia viene de fallback no operativo, el motor bloquea y pide revisar el plan.
+
+### Gemini y backend
+
+- La API key de Gemini sigue fuera del frontend.
+- La app Android puede configurar la URL del backend seguro desde `Nutricionista > Ajustes`.
+- Se anadio soporte para backend local en red privada, por ejemplo:
+
+```text
+http://192.168.1.253:5173
+```
+
+- El backend acepta llamadas CORS desde la app instalada.
+- Si Gemini no esta disponible porque el backend esta apagado o inaccesible, la generacion local determinista no debe romperse.
+- El badge de Gemini puede indicar error, pero el motor local debe seguir funcionando cuando no necesita Gemini.
+
+### Android
+
+- Se genero APK `release` firmada localmente para pruebas.
+- Se genero tambien un `.aab` para prueba interna en Google Play Console.
+- Se documenta que Android 7.1.7 puede dar problemas instalando APKs modernas por instalador, Play Protect, WebView, firma o sideload.
+- Se recomienda:
+  - usar ADB para pruebas directas.
+  - usar Google Play Console/prueba interna para distribucion estable.
+  - borrar datos o desinstalar versiones anteriores cuando haya conflicto de firma o planes locales antiguos.
+
+### UI movil
+
+- En la vista movil de nutricionista se anadio un boton compacto de `Salir` visible en el header.
+- Antes el boton solo aparecia en anchos medianos o escritorio, dejando a la nutricionista sin salida clara en movil/tablet estrecha.
+
+### E2E y validacion
+
+- Se anadio suite E2E con Playwright para cubrir flujos reales:
+  - generacion con alias confirmado.
+  - bloqueo de alias cuando la equivalencia es fallback.
+  - modo pareja con stock compartido.
+  - smoke completo: nutricionista crea pacientes/pareja y paciente usa generar, rapido y semana.
+- Validacion final de esta tanda:
+  - `84 tests` unitarios verdes.
+  - `4 E2E` verdes.
+  - build web correcto.
+  - APK release firmada correctamente.
+
 ## 2026-04-24
 
 ### Hallazgos
@@ -17,7 +98,7 @@ Registro de cambios funcionales relevantes del MVP.
 - Los planes parseados desde PDF con una version antigua del parser quedan marcados como `requiresReupload`.
 - El motor de generacion bloquea esos planes y pide volver a subir el PDF, en lugar de seguir generando con datos potencialmente inconsistentes.
 - La interfaz de nutricionista muestra ahora mejor el origen del plan, la version del parser y si requiere recarga.
-- Se ha añadido una regresion automatica para asegurar que un plan antiguo no vuelva a colarse como si fuera valido.
+- Se ha anadido una regresion automatica para asegurar que un plan antiguo no vuelva a colarse como si fuera valido.
 
 ### Objetivo del blindaje
 
