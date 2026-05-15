@@ -92,10 +92,21 @@ Medidas activas para reducir fallos silenciosos en el MVP.
 
 ## Validacion actual
 
-- Tests unitarios: `84`.
+- Tests unitarios: `104`.
 - Tests E2E Playwright: `4`.
 - Build web: correcto.
 - APK release: firmada correctamente con APK Signature Scheme v2.
+
+## Matriz de regresiones
+
+- Las incidencias reales corregidas se documentan en `docs/FEEDBACK_REGRESSIONS.md`.
+- Cada nueva correccion del motor debe anadir o actualizar una fila en esa matriz.
+- La matriz enlaza el feedback con su proteccion:
+  - test unitario.
+  - E2E.
+  - checklist manual.
+  - documento operativo.
+- Antes de tocar alias, parser, Gemini o modo pareja, hay que revisar esa matriz para evitar romper comportamientos ya corregidos.
 
 ## Siguiente blindaje recomendado
 
