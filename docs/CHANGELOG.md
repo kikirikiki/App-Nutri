@@ -2,6 +2,70 @@
 
 Registro de cambios funcionales relevantes del MVP.
 
+## 2026-05-15
+
+### Documentacion de feedback y regresiones
+
+- Se anadio `docs/FEEDBACK_REGRESSIONS.md` como matriz viva de incidencias reales.
+- Cada feedback queda documentado con:
+  - entrada o situacion reportada.
+  - fallo observado.
+  - comportamiento esperado.
+  - test, checklist o documento que lo protege.
+  - estado.
+- Objetivo: comprobar que al corregir un fallo no se destruye una correccion anterior.
+
+## 2026-05-13
+
+### Correcciones desde incidencias del cliente
+
+- `risotto` sigue resolviendo como `Arroz y derivados` y ahora `gambas/langostinos/camarones` se reconocen como proteina si el plan tiene `Pescado blanco`.
+- Si el usuario pide `atun al natural`, incluso con error tipo `atunal natural`, el motor prioriza `Atun al natural` y evita usar `Atun en aceite de oliva`.
+- Se reconoce lenguaje de reparto como `cincuenta por ciento`, `al cincuenta`, `mitad y mitad` y `a partes iguales`.
+- Si el usuario pide `cottage` dentro de una subfamilia donde no existe, el motor bloquea y pide subfamilia compatible; no lo sustituye por `Claras de huevo`.
+- Peticiones con `pizza` o `bacon` se bloquean si esos alimentos/formato no aparecen como equivalencia operativa del plan.
+
+### Validacion
+
+- Se anadieron regresiones con los textos reportados desde el log de incidencias.
+- `104 tests` unitarios verdes.
+- Build web correcto.
+- APK debug versionado reconstruido.
+
+## 2026-05-11
+
+### Feedback del cliente
+
+- Se anadio un boton `Reportar fallo` en las pantallas de cliente:
+  - Generar comida.
+  - Comida rapida.
+  - Menu semanal.
+- El reporte se guarda como log local con contexto tecnico suficiente para depurar:
+  - paciente y email.
+  - pantalla donde ocurrio.
+  - texto escrito por el usuario.
+  - tipo de comida, C1/C2 y modo individual/pareja cuando aplica.
+  - estado de Gemini.
+  - snapshot del resultado generado.
+  - estado basico del plan y version del parser.
+  - datos del dispositivo y viewport.
+- En `Nutricionista > Incidencias` se puede:
+  - ver incidencias pendientes.
+  - copiar una incidencia concreta.
+  - copiar todo el log para pegarlo en Codex.
+  - descargar el log en JSON.
+  - marcar incidencias como revisadas.
+  - borrar incidencias.
+- Tras guardar una incidencia desde la pantalla del cliente aparece tambien `Descargar JSON`.
+- El almacenamiento principal del log es local, bajo la clave `exact-meals-feedback-log-v1`; la descarga crea un archivo `exact-meals-*.json` usando el flujo normal de descargas del dispositivo.
+- La funcion no envia datos automaticamente a ningun servidor externo. En el MVP queda local y exportable para mantener control sobre datos de pacientes.
+
+### Validacion
+
+- `100 tests` unitarios verdes.
+- Build web correcto.
+- APK debug versionado reconstruido con los cambios.
+
 ## 2026-04-26
 
 ### Motor de generacion y fidelidad al plan
